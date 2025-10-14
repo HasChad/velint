@@ -44,6 +44,7 @@ pub fn window_conf() -> Conf {
         window_title: "epaint".into(),
         window_width: 800,
         window_height: 600,
+        sample_count: 8,
         icon: Some(set_icon()),
         ..Default::default()
     }

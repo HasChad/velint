@@ -44,24 +44,21 @@ async fn main() {
         clear_background(draw_state.bg_color);
         set_camera(&camera);
 
-        // MARK: UI
         ui.render_ui(&mut draw_state);
 
-        // MARK: DRAW
         draw_state.line_render();
         draw_state.current_line_render();
 
         draw_circle_lines(
             world_mpos.x,
             world_mpos.y,
-            draw_state.brush_size / 2.0,
+            draw_state.brush_size / 2.0 - 1.0,
             1.0,
             WHITE,
         );
 
         // draw_dashed_rectangle(0.0, 0.0, 100.0, 100.0, WHITE);
 
-        // MARK: DRAW UI
         egui_macroquad::draw();
 
         next_frame().await
