@@ -1,33 +1,18 @@
 use vello::{
     Scene,
-    kurbo::{Affine, BezPath, Circle, Stroke},
+    kurbo::{Affine, Circle, Stroke},
     peniko::Color,
 };
 
-use crate::{AppState, Shapes, brush_style::brush_draw};
+use crate::{AppState, Shapes, Tool, brush_style::brush_draw};
 
 pub fn prev_shape_draw(scene: &mut Scene, app_state: &mut AppState) {
     if !app_state.shapes.is_empty() {
         for shape in app_state.shapes.iter() {
             match shape {
-                Shapes::Brush(points) => {
-                    if !points.is_empty() {
-                        let mut bez_path = BezPath::new();
-                        bez_path.move_to(points[0]);
-
-                        for point in points {
-                            bez_path.line_to(*point);
-                        }
-
-                        let stroke = Stroke::new(app_state.brush_size as f64);
-                        scene.stroke(
-                            &stroke,
-                            Affine::IDENTITY,
-                            app_state.brush_color,
-                            None,
-                            &bez_path,
-                        );
-                    }
+                Shapes::Brush(shape) => {
+                    let stroke = Stroke::new(shape.size as f64);
+                    scene.stroke(&stroke, Affine::IDENTITY, shape.color, None, &shape.path);
                 }
                 Shapes::Rectangle(_points) => todo!(),
             }
@@ -37,8 +22,8 @@ pub fn prev_shape_draw(scene: &mut Scene, app_state: &mut AppState) {
 
 pub fn current_shape_draw(scene: &mut Scene, app_state: &mut AppState) {
     match &app_state.current_tool {
-        Shapes::Brush(_) => brush_draw(scene, app_state),
-        Shapes::Rectangle(_) => {}
+        Tool::Brush => brush_draw(scene, app_state),
+        Tool::Rectangle => {}
     }
 
     // ---

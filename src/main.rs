@@ -18,6 +18,8 @@ mod draw_controller;
 
 use draw_controller::*;
 
+use crate::brush_style::brush_complete;
+
 #[derive(Debug)]
 enum RenderState {
     Active {
@@ -34,13 +36,17 @@ struct ShapeProp {
     size: f32,
 }
 
-#[derive(Debug)]
 enum Shapes {
-    Brush(Vec<Point>),
-    Rectangle(Vec<Point>),
+    Brush(ShapeProp),
+    Rectangle(ShapeProp),
 }
 
-#[derive(Default, Clone, Copy, Debug)]
+enum Tool {
+    Brush,
+    Rectangle,
+}
+
+#[derive(Default, Clone, Copy)]
 pub struct ButtonState {
     pub held: bool,
     pub just_pressed: bool,
@@ -62,14 +68,13 @@ impl ButtonState {
     }
 }
 
-#[derive(Debug)]
 struct AppState {
     mouse_pos: Option<Point>,
     mouse_left: ButtonState,
     mouse_right: ButtonState,
     shapes: Vec<Shapes>,
     points: Vec<Point>,
-    current_tool: Shapes,
+    current_tool: Tool,
     brush_size: f32,
     brush_color: Color,
     bg_color: Color,
@@ -83,7 +88,7 @@ impl AppState {
             mouse_right: ButtonState::new(),
             points: vec![],
             shapes: vec![],
-            current_tool: Shapes::Brush(vec![]),
+            current_tool: Tool::Brush,
             brush_size: 5.0,
             brush_color: Color::WHITE,
             bg_color: Color::BLACK,
@@ -320,10 +325,7 @@ fn process_mouse(app_state: &mut AppState) {
     }
 
     if app_state.mouse_left.just_released {
-        app_state
-            .shapes
-            .push(Shapes::Brush(app_state.points.clone()));
-
+        app_state.shapes.push(brush_complete(app_state));
         app_state.points.clear();
     }
 }
