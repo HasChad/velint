@@ -1,1 +1,16 @@
-- add smooth brush style
+STYLES
+- brush
+- rectangle w/outline
+- circle w/outline
+- arrow
+- poly style w/outline
+- curve style
+
+- add camera
+-- camera zoom and move
+
+SETTINGS
+- brush size
+- brush color
+- background color
+- outline on/off
