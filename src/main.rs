@@ -1,6 +1,6 @@
 use anyhow::Result;
 use std::sync::Arc;
-use vello::kurbo::{Affine, BezPath, Circle, Point, Stroke};
+use vello::kurbo::{BezPath, Point};
 use vello::peniko::Color;
 use vello::util::{RenderContext, RenderSurface};
 use vello::wgpu;
@@ -9,6 +9,8 @@ use winit::application::ApplicationHandler;
 use winit::dpi::LogicalSize;
 use winit::event::{ElementState, MouseButton, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
+use winit::keyboard::KeyCode;
+use winit::keyboard::PhysicalKey;
 use winit::window::Window;
 
 mod brush_style;
@@ -24,6 +26,12 @@ enum RenderState {
         window: Arc<Window>,
     },
     Suspended(Option<Arc<Window>>),
+}
+
+struct ShapeProp {
+    path: BezPath,
+    color: Color,
+    size: f32,
 }
 
 #[derive(Debug)]
@@ -186,7 +194,17 @@ impl ApplicationHandler for Velint {
                     window.request_redraw();
                 }
             }
-
+            WindowEvent::KeyboardInput {
+                device_id: _,
+                event,
+                is_synthetic: _,
+            } => {
+                if event.physical_key == PhysicalKey::Code(KeyCode::Escape) {
+                    if event.state.is_pressed() {
+                        event_loop.exit();
+                    }
+                }
+            }
             WindowEvent::Resized(size) => {
                 if size.width != 0 && size.height != 0 {
                     self.context
