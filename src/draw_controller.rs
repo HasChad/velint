@@ -4,17 +4,15 @@ use vello::{
     peniko::Color,
 };
 
-use crate::{AppState, Shapes, Tool, brush_style::brush_draw};
+use crate::{AppState, Tool, brush_style::brush_draw};
 
 pub fn prev_shape_draw(scene: &mut Scene, app_state: &mut AppState) {
     if !app_state.shapes.is_empty() {
         for shape in app_state.shapes.iter() {
-            match shape {
-                Shapes::Brush(shape) => {
-                    let stroke = Stroke::new(shape.size as f64);
-                    scene.stroke(&stroke, Affine::IDENTITY, shape.color, None, &shape.path);
-                }
-                Shapes::Rectangle(_points) => todo!(),
+            if shape.is_fill {
+            } else {
+                let stroke = Stroke::new(shape.size as f64);
+                scene.stroke(&stroke, Affine::IDENTITY, shape.color, None, &shape.path);
             }
         }
     }

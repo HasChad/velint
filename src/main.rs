@@ -34,11 +34,7 @@ struct ShapeProp {
     path: BezPath,
     color: Color,
     size: f32,
-}
-
-enum Shapes {
-    Brush(ShapeProp),
-    Rectangle(ShapeProp),
+    is_fill: bool,
 }
 
 enum Tool {
@@ -72,7 +68,7 @@ struct AppState {
     mouse_pos: Option<Point>,
     mouse_left: ButtonState,
     mouse_right: ButtonState,
-    shapes: Vec<Shapes>,
+    shapes: Vec<ShapeProp>,
     points: Vec<Point>,
     current_tool: Tool,
     brush_size: f32,

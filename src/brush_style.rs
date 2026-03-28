@@ -3,7 +3,7 @@ use vello::{
     kurbo::{Affine, BezPath, Stroke},
 };
 
-use crate::{AppState, ShapeProp, Shapes};
+use crate::{AppState, ShapeProp};
 
 pub fn brush_draw(scene: &mut Scene, app_state: &mut AppState) {
     if !app_state.points.is_empty() {
@@ -25,7 +25,7 @@ pub fn brush_draw(scene: &mut Scene, app_state: &mut AppState) {
     }
 }
 
-pub fn brush_complete(app_state: &AppState) -> Shapes {
+pub fn brush_complete(app_state: &AppState) -> ShapeProp {
     let mut path = BezPath::new();
 
     if !app_state.points.is_empty() {
@@ -36,9 +36,10 @@ pub fn brush_complete(app_state: &AppState) -> Shapes {
         }
     }
 
-    Shapes::Brush(ShapeProp {
+    ShapeProp {
         path: path,
         color: app_state.brush_color,
         size: app_state.brush_size,
-    })
+        is_fill: false,
+    }
 }
