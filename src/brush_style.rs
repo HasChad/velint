@@ -5,6 +5,10 @@ use vello::{
 
 use crate::{AppState, ShapeProp};
 
+pub fn brush_input(app_state: &mut AppState) {
+    app_state.points.push(app_state.mouse_pos);
+}
+
 pub fn brush_draw(scene: &mut Scene, app_state: &mut AppState) {
     if !app_state.points.is_empty() {
         let mut bez_path = BezPath::new();
@@ -28,12 +32,10 @@ pub fn brush_draw(scene: &mut Scene, app_state: &mut AppState) {
 pub fn brush_complete(app_state: &AppState) -> ShapeProp {
     let mut path = BezPath::new();
 
-    if !app_state.points.is_empty() {
-        path.move_to(app_state.points[0]);
+    path.move_to(app_state.points[0]);
 
-        for point in app_state.points.iter() {
-            path.line_to(*point);
-        }
+    for point in app_state.points.iter() {
+        path.line_to(*point);
     }
 
     ShapeProp {

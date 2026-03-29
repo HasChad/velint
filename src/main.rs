@@ -15,10 +15,12 @@ use winit::window::Window;
 
 mod brush_style;
 mod draw_controller;
+mod rectangle_style;
 
 use draw_controller::*;
 
-use crate::brush_style::brush_complete;
+use crate::brush_style::{brush_complete, brush_input};
+use crate::rectangle_style::{rectangle_complete, rectangle_input};
 
 #[derive(Debug)]
 enum RenderState {
@@ -65,7 +67,7 @@ impl ButtonState {
 }
 
 struct AppState {
-    mouse_pos: Option<Point>,
+    mouse_pos: Point,
     mouse_left: ButtonState,
     mouse_right: ButtonState,
     shapes: Vec<ShapeProp>,
@@ -79,7 +81,7 @@ struct AppState {
 impl AppState {
     fn new() -> Self {
         Self {
-            mouse_pos: None,
+            mouse_pos: Point::ZERO,
             mouse_left: ButtonState::new(),
             mouse_right: ButtonState::new(),
             points: vec![],
@@ -163,10 +165,10 @@ impl ApplicationHandler for Velint {
                 device_id: _,
                 position,
             } => {
-                self.app_state.mouse_pos = Some(Point {
+                self.app_state.mouse_pos = Point {
                     x: position.x,
                     y: position.y,
-                });
+                };
 
                 // Request redraw. maybe i should find a better way
                 if let RenderState::Active { window, .. } = &self.render_state {
@@ -204,6 +206,15 @@ impl ApplicationHandler for Velint {
                     if event.state.is_pressed() {
                         event_loop.exit();
                     }
+                }
+
+                if event.physical_key == PhysicalKey::Code(KeyCode::Digit1) {
+                    self.app_state.current_tool = Tool::Brush;
+                    println!("Tool = Brush")
+                }
+                if event.physical_key == PhysicalKey::Code(KeyCode::Digit2) {
+                    self.app_state.current_tool = Tool::Rectangle;
+                    println!("Tool = Rectangle")
                 }
             }
             WindowEvent::Resized(size) => {
@@ -315,13 +326,19 @@ fn create_vello_renderer(render_cx: &RenderContext, surface: &RenderSurface<'_>)
 
 fn process_mouse(app_state: &mut AppState) {
     if app_state.mouse_left.held {
-        if let Some(mpos) = app_state.mouse_pos {
-            app_state.points.push(mpos);
-        }
+        match app_state.current_tool {
+            Tool::Brush => brush_input(app_state),
+            Tool::Rectangle => rectangle_input(app_state),
+        };
     }
 
     if app_state.mouse_left.just_released {
-        app_state.shapes.push(brush_complete(app_state));
+        app_state.shapes.push(match app_state.current_tool {
+            Tool::Brush => brush_complete(app_state),
+            Tool::Rectangle => rectangle_complete(app_state),
+        });
+
+        app_state.mouse_left.just_released = false;
         app_state.points.clear();
     }
 }
