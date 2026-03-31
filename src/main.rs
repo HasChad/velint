@@ -102,6 +102,14 @@ struct Velint {
     app_state: AppState,
 }
 
+impl Velint {
+    fn request_redraw(&self) {
+        if let RenderState::Active { window, .. } = &self.render_state {
+            window.request_redraw();
+        }
+    }
+}
+
 impl ApplicationHandler for Velint {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let RenderState::Suspended(cached_window) = &mut self.render_state else {
@@ -170,32 +178,21 @@ impl ApplicationHandler for Velint {
                     y: position.y,
                 };
 
-                // Request redraw. maybe i should find a better way
-                if let RenderState::Active { window, .. } = &self.render_state {
-                    window.request_redraw();
-                }
+                self.request_redraw();
             }
             WindowEvent::MouseInput {
                 device_id: _,
                 state,
                 button,
             } => {
-                let mut raw_mouse_left = false;
-                let mut raw_mouse_right = false;
-
-                if button == MouseButton::Left {
-                    raw_mouse_left = state == ElementState::Pressed;
-                }
-                if button == MouseButton::Right {
-                    raw_mouse_right = state == ElementState::Pressed;
+                let pressed = state == ElementState::Pressed;
+                match button {
+                    MouseButton::Left => self.app_state.mouse_left.update(pressed),
+                    MouseButton::Right => self.app_state.mouse_right.update(pressed),
+                    _ => {}
                 }
 
-                self.app_state.mouse_left.update(raw_mouse_left);
-                self.app_state.mouse_right.update(raw_mouse_right);
-
-                if let RenderState::Active { window, .. } = &self.render_state {
-                    window.request_redraw();
-                }
+                self.request_redraw();
             }
             WindowEvent::KeyboardInput {
                 device_id: _,
@@ -283,8 +280,6 @@ impl ApplicationHandler for Velint {
                 device_handle.queue.submit([encoder.finish()]);
                 // Queue the texture to be presented on the surface
                 surface_texture.present();
-
-                device_handle.device.poll(wgpu::PollType::Poll).unwrap();
             }
             _ => {}
         }
